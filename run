@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+tmp="rasdfas.out"
+trap "rm $tmp" EXIT
+
+go build -o $tmp
+./$tmp
