@@ -7,6 +7,7 @@ import (
 	"go/token"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 )
 
@@ -35,9 +36,6 @@ func newAST(filename string) (*AST, error) {
 }
 
 func (a *AST) ApplyMutation(m Mutator) {
-	// mutation := new(ast.File)
-	// *mutation = *a.original
-
 	visitor := newNodeVisitor(a, m)
 	a.forEachFile(func(name string, file *ast.File) error {
 		ast.Walk(visitor, file)
@@ -58,6 +56,7 @@ func (a *AST) forEachFile(fn func(string, *ast.File) error) error {
 
 func (a *AST) write(basepath string) error {
 	return a.forEachFile(func(name string, ast *ast.File) error {
+		name = strings.TrimPrefix(name, wd)
 		filename := filepath.Join(basepath, name)
 		if err := os.MkdirAll(filepath.Dir(filename), 0777); err != nil {
 			return err

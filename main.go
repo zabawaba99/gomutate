@@ -2,7 +2,7 @@ package main
 
 import "os"
 
-var mutationDir = "_gomutate"
+const mutationDir = "_gomutate"
 
 func init() {
 	if err := os.RemoveAll(mutationDir); err != nil {
@@ -16,11 +16,6 @@ func init() {
 
 func main() {
 	// parse files
-	wd, err := os.Getwd()
-	if err != nil {
-		fLog("Could not get working directory %s\n", err)
-	}
-
 	a, err := newAST(wd)
 	if err != nil {
 		fLog("Could not read dir %s\n", err)
