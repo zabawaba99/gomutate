@@ -7,10 +7,20 @@ import (
 )
 
 var negateConditionalsMapping = map[token.Token]token.Token{
-	//    <          >
-	token.LSS: token.GTR,
-	//    >          <
-	token.GTR: token.LSS,
+	//    ==         !=
+	token.EQL: token.NEQ,
+	//    !=         ==
+	token.NEQ: token.EQL,
+
+	//    <=         >
+	token.LEQ: token.GTR,
+	//    >=         <
+	token.GEQ: token.LSS,
+
+	//    <          >=
+	token.LSS: token.GEQ,
+	//    >          <=
+	token.GTR: token.LEQ,
 }
 
 type NegateConditionals struct {
