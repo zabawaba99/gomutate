@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -33,4 +34,8 @@ func fLog(msg string, args ...interface{}) {
 func randomStr(size int) string {
 	secs := time.Now().UnixNano()
 	return strconv.FormatInt(secs, 10)
+}
+
+func trimWD(filename string) string {
+	return strings.TrimPrefix(filename, wd+"/")
 }

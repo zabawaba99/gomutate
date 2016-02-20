@@ -37,7 +37,7 @@ func (nc *NegateConditionals) Mutate(node ast.Node) (reset func(), ok bool) {
 	case *ast.IfStmt:
 		return nc.mutateBoundary(node.(*ast.IfStmt))
 	default:
-		fmt.Printf("ParseFunc: %T\n", node)
+		// fmt.Printf("ParseFunc: %T\n", node)
 	}
 
 	return
@@ -55,7 +55,7 @@ func (nc *NegateConditionals) mutateBoundary(ifStmt *ast.IfStmt) (reset func(), 
 		// setup return
 		return func() { bExpr.Op = oldOp }, true
 	default:
-		fmt.Printf("mutateBoundary: %T\n", ifStmt)
+		fmt.Printf("mutateBoundary: %T\n", ifStmt.Cond)
 	}
 
 	return
