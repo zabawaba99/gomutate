@@ -2,18 +2,18 @@ package main
 
 import (
 	"go/ast"
-	"os"
-	"os/exec"
+	"go/token"
 	"path/filepath"
 )
 
 type nodeVistor struct {
 	mutation Mutator
+	file     *token.File
 	ast      *AST
 }
 
-func newNodeVisitor(a *AST, m Mutator) *nodeVistor {
-	return &nodeVistor{ast: a, mutation: m}
+func newNodeVisitor(a *AST, file *token.File, m Mutator) *nodeVistor {
+	return &nodeVistor{ast: a, file: file, mutation: m}
 }
 
 func (v *nodeVistor) Visit(n ast.Node) ast.Visitor {
@@ -32,14 +32,11 @@ func (v *nodeVistor) Visit(n ast.Node) ast.Visitor {
 	reset()
 	v.ast.mtx.Unlock()
 
-	cmd := exec.Command("go", "test", "."+separator+basedir+separator+"...")
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	cmd.Run()
-
-	if cmd.ProcessState.Success() {
-		dLog("MUTANT IS ALIVE!")
+	md := MutantData{
+		Filename:   v.file.Name(),
+		LineNumber: v.file.Line(n.Pos()),
 	}
+	md.save(basedir)
 
 	return v
 }
