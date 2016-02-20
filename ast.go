@@ -7,7 +7,6 @@ import (
 	"go/token"
 	"os"
 	"path/filepath"
-	"strings"
 	"sync"
 )
 
@@ -17,9 +16,10 @@ type Mutator interface {
 }
 
 type AST struct {
-	mtx  sync.Mutex
-	fset *token.FileSet
-	pkgs map[string]*ast.Package
+	mtx   sync.Mutex
+	fset  *token.FileSet
+	pkgs  map[string]*ast.Package
+	files map[string]*token.File
 }
 
 func newAST(filename string) (*AST, error) {
@@ -29,15 +29,22 @@ func newAST(filename string) (*AST, error) {
 		return nil, err
 	}
 
-	return &AST{
-		fset: fset,
-		pkgs: pkgs,
-	}, nil
+	a := &AST{
+		fset:  fset,
+		pkgs:  pkgs,
+		files: map[string]*token.File{},
+	}
+	fset.Iterate(func(f *token.File) bool {
+		a.files[trimWD(f.Name())] = f
+		return true
+	})
+
+	return a, nil
 }
 
 func (a *AST) ApplyMutation(m Mutator) {
-	visitor := newNodeVisitor(a, m)
 	a.forEachFile(func(name string, file *ast.File) error {
+		visitor := newNodeVisitor(a, a.files[name], m)
 		ast.Walk(visitor, file)
 		return nil
 	})
@@ -46,6 +53,7 @@ func (a *AST) ApplyMutation(m Mutator) {
 func (a *AST) forEachFile(fn func(string, *ast.File) error) error {
 	for _, pkg := range a.pkgs {
 		for fname, ast := range pkg.Files {
+			fname = trimWD(fname)
 			if err := fn(fname, ast); err != nil {
 				return err
 			}
@@ -56,7 +64,6 @@ func (a *AST) forEachFile(fn func(string, *ast.File) error) error {
 
 func (a *AST) write(basepath string) error {
 	return a.forEachFile(func(name string, ast *ast.File) error {
-		name = strings.TrimPrefix(name, wd)
 		filename := filepath.Join(basepath, name)
 		if err := os.MkdirAll(filepath.Dir(filename), 0777); err != nil {
 			return err
