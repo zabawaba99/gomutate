@@ -4,4 +4,7 @@ tmp="rasdfas.out"
 trap "rm $tmp" EXIT
 
 go build -o $tmp
-./$tmp
+
+cd sample
+../$tmp
+cd -

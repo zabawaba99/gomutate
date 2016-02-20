@@ -38,7 +38,7 @@ func (a *AST) ApplyMutation(m Mutator) {
 	// mutation := new(ast.File)
 	// *mutation = *a.original
 
-	visitor := newNodeVisitor(a, &BoundaryMutator{})
+	visitor := newNodeVisitor(a, m)
 	a.forEachFile(func(name string, file *ast.File) error {
 		ast.Walk(visitor, file)
 		return nil
