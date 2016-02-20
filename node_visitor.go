@@ -2,7 +2,6 @@ package main
 
 import (
 	"go/ast"
-	"go/printer"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -26,38 +25,21 @@ func (v *nodeVistor) Visit(n ast.Node) ast.Visitor {
 	}
 
 	mutation := randomStr(10)
-	filename := filepath.Join(mutationDir, v.mutation.Name(), mutation, v.ast.filename)
-	if err := v.writeFile(filename); err != nil {
+	basedir := filepath.Join(mutationDir, v.mutation.Name(), mutation)
+	if err := v.ast.write(basedir); err != nil {
 		fLog("Could not create mutation file %s\n", err)
 	}
 	reset()
 	v.ast.mtx.Unlock()
 
-	cmd := exec.Command("go", "test", "./"+filepath.Dir(filename)+"/...")
+	cmd := exec.Command("go", "test", "."+separator+basedir+separator+"...")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	if err := cmd.Run(); err != nil {
-		fLog("Could not run tests %s\n", err)
+	cmd.Run()
+
+	if cmd.ProcessState.Success() {
+		dLog("MUTANT IS ALIVE!")
 	}
 
 	return v
-}
-
-func (v *nodeVistor) writeFile(filename string) error {
-	if err := os.MkdirAll(filepath.Dir(filename), 0777); err != nil {
-		return err
-	}
-
-	file, err := os.Create(filename)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	err = printer.Fprint(file, v.ast.fset, v.ast.original)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }

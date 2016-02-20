@@ -3,18 +3,16 @@ package main
 var a = 1 > 2
 
 func main() {
-	myFunc()
+	myFunc(1)
 }
 
-func myFunc() {
-	i := 1
+func myFunc(i int) bool {
 	if i < 0 {
-		i = 1
-		i++
+		return true
 	}
 
 	if i > 11 {
-		i = 123
-		i--
+		return false
 	}
+	return false
 }

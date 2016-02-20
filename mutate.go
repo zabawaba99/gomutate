@@ -30,9 +30,9 @@ func main() {
 
 	log.Printf("Mutants %#v", mutants)
 
-	a, err := newAST("sample/main.go")
+	a, err := newAST("sample")
 	if err != nil {
-		log.Fatal(err)
+		fLog("Could not read dir %s\n", err)
 	}
 	a.ApplyMutation(&BoundaryMutator{})
 	// generate mutants
