@@ -7,6 +7,7 @@ import (
 	"go/token"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 
 	"github.com/zabawaba99/gomutate/mutants"
@@ -53,6 +54,10 @@ func (a *AST) forEachFile(fn func(string, *ast.File) error) error {
 
 func (a *AST) ApplyMutation(m mutants.Mutator) {
 	a.forEachFile(func(name string, file *ast.File) error {
+		if strings.HasSuffix(name, "_test.go") {
+			return nil
+		}
+
 		visitor := newNodeVisitor(a, a.files[name], m)
 		ast.Walk(visitor, file)
 		return nil
