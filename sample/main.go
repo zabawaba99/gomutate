@@ -9,6 +9,8 @@ func main() {
 func myFunc(i int) bool {
 	if i < 0 {
 		return true
+	} else if i < 2 {
+		println("Hi")
 	}
 
 	if i > 11 {

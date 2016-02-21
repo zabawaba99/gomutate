@@ -30,7 +30,7 @@ func (nc *NegateConditionals) Name() string {
 	return "boundary_mutations"
 }
 
-func (nc *NegateConditionals) Mutate(node ast.Node) (reset func(), ok bool) {
+func (nc *NegateConditionals) Mutate(node ast.Node) (m Mutation, ok bool) {
 	switch node.(type) {
 	case nil:
 		// ignore
@@ -43,7 +43,7 @@ func (nc *NegateConditionals) Mutate(node ast.Node) (reset func(), ok bool) {
 	return
 }
 
-func (nc *NegateConditionals) mutateBoundary(ifStmt *ast.IfStmt) (reset func(), ok bool) {
+func (nc *NegateConditionals) mutateBoundary(ifStmt *ast.IfStmt) (m Mutation, ok bool) {
 	switch ifStmt.Cond.(type) {
 	case *ast.BinaryExpr:
 		bExpr := ifStmt.Cond.(*ast.BinaryExpr)
@@ -52,8 +52,13 @@ func (nc *NegateConditionals) mutateBoundary(ifStmt *ast.IfStmt) (reset func(), 
 		bExpr.Op = negateConditionalsMapping[bExpr.Op]
 		fmt.Println("Boundary Mutated")
 
+		m = Mutation{
+			OrgStmt: fmt.Sprintf("%s", oldOp),
+			NewStmt: fmt.Sprintf("%s", bExpr.Op),
+			Reset:   func() { bExpr.Op = oldOp },
+		}
 		// setup return
-		return func() { bExpr.Op = oldOp }, true
+		return m, true
 	default:
 		fmt.Printf("mutateBoundary: %T\n", ifStmt.Cond)
 	}

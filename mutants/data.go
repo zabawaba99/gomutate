@@ -6,16 +6,18 @@ import (
 	"path/filepath"
 )
 
-const dataName = "gomutate.json"
+const DataFileName = "gomutate.json"
 
 type Data struct {
 	Filename   string `json:"filename"`
 	LineNumber int    `json:"line_number"`
+	Original   string `json:"original"`
+	Mutation   string `json:"mutation"`
 	Killed     bool   `json:"killed"`
 }
 
 func (md *Data) Load(path string) {
-	f, err := os.Open(filepath.Join(path, dataName))
+	f, err := os.Open(filepath.Join(path, DataFileName))
 	if err != nil {
 		fLog("Could not create gomutate.json %s", err)
 	}
@@ -25,7 +27,7 @@ func (md *Data) Load(path string) {
 }
 
 func (md *Data) Save(path string) {
-	f, err := os.Create(filepath.Join(path, dataName))
+	f, err := os.Create(filepath.Join(path, DataFileName))
 	if err != nil {
 		fLog("Could not create gomutate.json %s", err)
 	}

@@ -20,21 +20,22 @@ func newNodeVisitor(a *AST, file *token.File, m mutants.Mutator) *nodeVistor {
 
 func (v *nodeVistor) Visit(n ast.Node) ast.Visitor {
 	v.ast.mtx.Lock()
-	reset, ok := v.mutation.Mutate(n)
+	mutation, ok := v.mutation.Mutate(n)
 	if !ok {
 		v.ast.mtx.Unlock()
 		return v
 	}
 
-	mutation := randomStr(10)
-	basedir := filepath.Join(mutationDir, v.mutation.Name(), mutation)
+	basedir := filepath.Join(mutationDir, v.mutation.Name(), randomStr(10))
 	if err := v.ast.write(basedir); err != nil {
 		fLog("Could not create mutation file %s\n", err)
 	}
-	reset()
+	mutation.Reset()
 	v.ast.mtx.Unlock()
 
 	md := mutants.Data{
+		Original:   mutation.OrgStmt,
+		Mutation:   mutation.NewStmt,
 		Filename:   v.file.Name(),
 		LineNumber: v.file.Line(n.Pos()),
 	}

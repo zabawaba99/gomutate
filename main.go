@@ -1,10 +1,12 @@
 package main
 
 import (
+	"encoding/json"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 
 	"github.com/zabawaba99/gomutate/mutants"
 )
@@ -38,6 +40,7 @@ func main() {
 	}
 
 	// generate reports
+	aggregateResults()
 }
 
 func runTests(m mutants.Mutator) {
@@ -61,4 +64,29 @@ func runTests(m mutants.Mutator) {
 		md.Killed = !cmd.ProcessState.Success()
 		md.Save(pkg)
 	}
+}
+
+func aggregateResults() {
+	results := []mutants.Data{}
+	filepath.Walk(mutationDir, func(path string, info os.FileInfo, err error) error {
+		if info.Name() != mutants.DataFileName {
+			return nil
+		}
+
+		pkg := strings.TrimSuffix(path, info.Name())
+
+		var result mutants.Data
+		result.Load(pkg)
+		results = append(results, result)
+
+		return nil
+	})
+
+	f, err := os.Create(filepath.Join(mutationDir, "results.json"))
+	if err != nil {
+		fLog("Could not create gomutate.json %s", err)
+	}
+	defer f.Close()
+
+	json.NewEncoder(f).Encode(results)
 }
