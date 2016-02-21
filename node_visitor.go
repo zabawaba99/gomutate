@@ -4,15 +4,17 @@ import (
 	"go/ast"
 	"go/token"
 	"path/filepath"
+
+	"github.com/zabawaba99/gomutate/mutants"
 )
 
 type nodeVistor struct {
-	mutation Mutator
+	mutation mutants.Mutator
 	file     *token.File
 	ast      *AST
 }
 
-func newNodeVisitor(a *AST, file *token.File, m Mutator) *nodeVistor {
+func newNodeVisitor(a *AST, file *token.File, m mutants.Mutator) *nodeVistor {
 	return &nodeVistor{ast: a, file: file, mutation: m}
 }
 
@@ -32,11 +34,11 @@ func (v *nodeVistor) Visit(n ast.Node) ast.Visitor {
 	reset()
 	v.ast.mtx.Unlock()
 
-	md := MutantData{
+	md := mutants.Data{
 		Filename:   v.file.Name(),
 		LineNumber: v.file.Line(n.Pos()),
 	}
-	md.save(basedir)
+	md.Save(basedir)
 
 	return v
 }

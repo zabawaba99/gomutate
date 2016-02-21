@@ -5,6 +5,8 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+
+	"github.com/zabawaba99/gomutate/mutants"
 )
 
 const mutationDir = "_gomutate"
@@ -26,7 +28,7 @@ func main() {
 		fLog("Could not read dir %s\n", err)
 	}
 
-	mutations := []Mutator{&NegateConditionals{}}
+	mutations := []mutants.Mutator{&mutants.NegateConditionals{}}
 	for _, m := range mutations {
 		// generate mutants
 		a.ApplyMutation(m)
@@ -38,14 +40,14 @@ func main() {
 	// generate reports
 }
 
-func runTests(m Mutator) {
+func runTests(m mutants.Mutator) {
 	mtpath := filepath.Join(mutationDir, m.Name())
-	mutants, err := ioutil.ReadDir(mtpath)
+	deviants, err := ioutil.ReadDir(mtpath)
 	if err != nil {
 		fLog("Could not find mutant directories %s", err)
 	}
 
-	for _, mt := range mutants {
+	for _, mt := range deviants {
 		pkg := filepath.Join(mtpath, mt.Name())
 		dLog("Running tests for %s", pkg)
 
@@ -54,9 +56,9 @@ func runTests(m Mutator) {
 		// cmd.Stderr = os.Stderr
 		cmd.Run()
 
-		var md MutantData
-		md.load(pkg)
+		var md mutants.Data
+		md.Load(pkg)
 		md.Killed = !cmd.ProcessState.Success()
-		md.save(pkg)
+		md.Save(pkg)
 	}
 }

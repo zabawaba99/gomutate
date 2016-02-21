@@ -8,12 +8,9 @@ import (
 	"os"
 	"path/filepath"
 	"sync"
-)
 
-type Mutator interface {
-	Mutate(ast.Node) (func(), bool)
-	Name() string
-}
+	"github.com/zabawaba99/gomutate/mutants"
+)
 
 type AST struct {
 	mtx   sync.Mutex
@@ -42,14 +39,6 @@ func newAST(filename string) (*AST, error) {
 	return a, nil
 }
 
-func (a *AST) ApplyMutation(m Mutator) {
-	a.forEachFile(func(name string, file *ast.File) error {
-		visitor := newNodeVisitor(a, a.files[name], m)
-		ast.Walk(visitor, file)
-		return nil
-	})
-}
-
 func (a *AST) forEachFile(fn func(string, *ast.File) error) error {
 	for _, pkg := range a.pkgs {
 		for fname, ast := range pkg.Files {
@@ -60,6 +49,14 @@ func (a *AST) forEachFile(fn func(string, *ast.File) error) error {
 		}
 	}
 	return nil
+}
+
+func (a *AST) ApplyMutation(m mutants.Mutator) {
+	a.forEachFile(func(name string, file *ast.File) error {
+		visitor := newNodeVisitor(a, a.files[name], m)
+		ast.Walk(visitor, file)
+		return nil
+	})
 }
 
 func (a *AST) write(basepath string) error {

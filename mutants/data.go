@@ -1,4 +1,4 @@
-package main
+package mutants
 
 import (
 	"encoding/json"
@@ -6,16 +6,16 @@ import (
 	"path/filepath"
 )
 
-const mutantDataName = "gomutate.json"
+const dataName = "gomutate.json"
 
-type MutantData struct {
+type Data struct {
 	Filename   string `json:"filename"`
 	LineNumber int    `json:"line_number"`
 	Killed     bool   `json:"killed"`
 }
 
-func (md *MutantData) load(path string) {
-	f, err := os.Open(filepath.Join(path, mutantDataName))
+func (md *Data) Load(path string) {
+	f, err := os.Open(filepath.Join(path, dataName))
 	if err != nil {
 		fLog("Could not create gomutate.json %s", err)
 	}
@@ -24,8 +24,8 @@ func (md *MutantData) load(path string) {
 	json.NewDecoder(f).Decode(md)
 }
 
-func (md *MutantData) save(path string) {
-	f, err := os.Create(filepath.Join(path, mutantDataName))
+func (md *Data) Save(path string) {
+	f, err := os.Create(filepath.Join(path, dataName))
 	if err != nil {
 		fLog("Could not create gomutate.json %s", err)
 	}

@@ -26,6 +26,7 @@ func dLog(msg string, args ...interface{}) {
 	msg = fmt.Sprintf("DEBUG\t%s\n", msg)
 	fmt.Printf(msg, args...)
 }
+
 func fLog(msg string, args ...interface{}) {
 	fmt.Printf(msg, args...)
 	os.Exit(1)
