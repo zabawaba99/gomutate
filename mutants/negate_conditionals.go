@@ -34,23 +34,17 @@ func (nc *NegateConditionals) Mutate(node ast.Node) (m Mutation, ok bool) {
 	switch node.(type) {
 	case nil:
 		// ignore
-	case *ast.IfStmt:
-		return nc.mutateBoundary(node.(*ast.IfStmt))
-	default:
-		// fmt.Printf("ParseFunc: %T\n", node)
-	}
-
-	return
-}
-
-func (nc *NegateConditionals) mutateBoundary(ifStmt *ast.IfStmt) (m Mutation, ok bool) {
-	switch ifStmt.Cond.(type) {
 	case *ast.BinaryExpr:
-		bExpr := ifStmt.Cond.(*ast.BinaryExpr)
+		bExpr := node.(*ast.BinaryExpr)
+		if _, ok := negateConditionalsMapping[bExpr.Op]; !ok {
+			fmt.Println("Skipping...", bExpr.Op)
+			return m, false
+		}
+
 		oldOp := bExpr.Op
 
 		bExpr.Op = negateConditionalsMapping[bExpr.Op]
-		fmt.Println("Boundary Mutated")
+		fmt.Println("Mutated...", oldOp)
 
 		m = Mutation{
 			OrgStmt: fmt.Sprintf("%s", oldOp),
@@ -60,7 +54,7 @@ func (nc *NegateConditionals) mutateBoundary(ifStmt *ast.IfStmt) (m Mutation, ok
 		// setup return
 		return m, true
 	default:
-		fmt.Printf("mutateBoundary: %T\n", ifStmt.Cond)
+		fmt.Printf("ParseFunc: %T\n", node)
 	}
 
 	return
