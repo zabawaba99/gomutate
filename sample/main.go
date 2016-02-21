@@ -13,7 +13,7 @@ func myFunc(i int) bool {
 		println("Hi")
 	}
 
-	if i > 11 {
+	if i > 11 && i < 11 {
 		return false
 	}
 	return false

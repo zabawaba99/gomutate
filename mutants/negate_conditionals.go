@@ -36,14 +36,15 @@ func (nc *NegateConditionals) Mutate(node ast.Node) (m Mutation, ok bool) {
 		// ignore
 	case *ast.BinaryExpr:
 		bExpr := node.(*ast.BinaryExpr)
-		if _, ok := negateConditionalsMapping[bExpr.Op]; !ok {
+
+		newOP, ok := negateConditionalsMapping[bExpr.Op]
+		if !ok {
 			fmt.Println("Skipping...", bExpr.Op)
 			return m, false
 		}
 
 		oldOp := bExpr.Op
-
-		bExpr.Op = negateConditionalsMapping[bExpr.Op]
+		bExpr.Op = newOP
 		fmt.Println("Mutated...", oldOp)
 
 		m = Mutation{

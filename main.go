@@ -30,7 +30,10 @@ func main() {
 		fLog("Could not read dir %s\n", err)
 	}
 
-	mutations := []mutants.Mutator{&mutants.NegateConditionals{}}
+	mutations := []mutants.Mutator{
+		&mutants.ConditionalsBoundary{},
+		&mutants.NegateConditionals{},
+	}
 	for _, m := range mutations {
 		// generate mutants
 		a.ApplyMutation(m)
