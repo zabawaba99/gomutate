@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -15,11 +16,11 @@ const mutationDir = "_gomutate"
 
 func init() {
 	if err := os.RemoveAll(mutationDir); err != nil {
-		fLog("Could not delete 'gomutate' directory %s\n", err)
+		fLog("Could not delete '_gomutate' directory %s\n", err)
 	}
 
 	if err := os.Mkdir(mutationDir, 0777); err != nil {
-		fLog("Could not recreate 'gomutate' directory\n", err)
+		fLog("Could not recreate '_gomutate' directory\n", err)
 	}
 }
 
@@ -30,14 +31,16 @@ func main() {
 		fLog("Could not read dir %s\n", err)
 	}
 
-	mutations := []mutants.Mutator{
+	mutants := []mutants.Mutator{
 		&mutants.ConditionalsBoundary{},
 		&mutants.NegateConditionals{},
 	}
-	for _, m := range mutations {
+	for _, m := range mutants {
+		fmt.Printf("Generating %s mutants\n", m.Name())
 		// generate mutants
 		a.ApplyMutation(m)
 
+		fmt.Println("Testing mutants")
 		// run tests
 		runTests(m)
 	}
@@ -54,6 +57,10 @@ func runTests(m mutants.Mutator) {
 	}
 
 	for _, mt := range deviants {
+		if !mt.IsDir() {
+			continue
+		}
+
 		pkg := filepath.Join(mtpath, mt.Name())
 		dLog("Running tests for %s", pkg)
 
@@ -65,6 +72,7 @@ func runTests(m mutants.Mutator) {
 		var md mutants.Data
 		md.Load(pkg)
 		md.Killed = !cmd.ProcessState.Success()
+		dLog("Killed %t", md.Killed)
 		md.Save(pkg)
 	}
 }

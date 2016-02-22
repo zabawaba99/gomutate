@@ -37,6 +37,8 @@ func newAST(filename string) (*AST, error) {
 		return true
 	})
 
+	dLog("Parsed - %s - %#v", filename, a.pkgs)
+
 	return a, nil
 }
 

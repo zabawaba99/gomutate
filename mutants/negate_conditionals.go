@@ -39,13 +39,13 @@ func (nc *NegateConditionals) Mutate(node ast.Node) (m Mutation, ok bool) {
 
 		newOP, ok := negateConditionalsMapping[bExpr.Op]
 		if !ok {
-			fmt.Println("Skipping...", bExpr.Op)
+			// fmt.Println("Skipping...", bExpr.Op)
 			return m, false
 		}
 
 		oldOp := bExpr.Op
 		bExpr.Op = newOP
-		fmt.Println("Mutated...", oldOp)
+		// fmt.Println("Mutated...", oldOp)
 
 		m = Mutation{
 			OrgStmt: fmt.Sprintf("%s", oldOp),
@@ -55,7 +55,7 @@ func (nc *NegateConditionals) Mutate(node ast.Node) (m Mutation, ok bool) {
 		// setup return
 		return m, true
 	default:
-		fmt.Printf("ParseFunc: %T\n", node)
+		// fmt.Printf("ParseFunc: %T\n", node)
 	}
 
 	return
