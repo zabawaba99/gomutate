@@ -20,7 +20,7 @@ func init() {
 	}
 
 	if err := os.Mkdir(mutationDir, 0777); err != nil {
-		log.Fatalf("Could not recreate '_gomutate' directory", err)
+		log.Fatalf("Could not recreate '_gomutate' directory %s", err)
 	}
 }
 

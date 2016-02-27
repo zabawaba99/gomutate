@@ -82,7 +82,7 @@ func dedup(pkgs []string) []string {
 
 	rtn := make([]string, len(set))
 	counter := 0
-	for v, _ := range set {
+	for v := range set {
 		rtn[counter] = v
 		counter++
 	}
