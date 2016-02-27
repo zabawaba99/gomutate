@@ -33,7 +33,7 @@ func New(wd string) *Gomutate {
 	return &Gomutate{wd: wd}
 }
 
-func (g *Gomutate) Run(pkg string, mutations ...mutants.Mutator) {
+func (g *Gomutate) Run(pkg string, mutations []mutants.Mutator) {
 	// parse files
 	a, err := newAST(filepath.Join(g.wd, pkg))
 	if err != nil {
@@ -79,8 +79,14 @@ func (g *Gomutate) runTests(pkg string, m mutants.Mutator) {
 		var md mutants.Data
 		md.Load(mutant)
 		md.Killed = !cmd.ProcessState.Success()
-		log.WithFields(log.Fields{"killed": md.Killed, "mutant": mutant}).Info("Result")
 		md.Save(mutant)
+
+		fields := log.Fields{"killed": md.Killed, "mutant": mutant}
+		if md.Killed {
+			log.WithFields(fields).Info("Result")
+		} else {
+			log.WithFields(fields).Warn("Result")
+		}
 	}
 }
 

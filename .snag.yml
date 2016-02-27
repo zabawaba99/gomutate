@@ -11,4 +11,6 @@ ignore:
 
 build:
   - go build ./cmd/gomutate
-  - ./run
+  - go vet .
+  - gofmt -l -s .
+  - golint .

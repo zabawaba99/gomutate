@@ -11,8 +11,14 @@ import (
 	"github.com/zabawaba99/gomutate/mutants"
 )
 
+var mutatorMapping = map[string]mutants.Mutator{
+	"conditionals-boundary": &mutants.ConditionalsBoundary{},
+	"negate-conditionals":   &mutants.NegateConditionals{},
+}
+
 type Options struct {
-	Debug bool `short:"d" long:"debug" description:"Show debug information"`
+	Debug   bool     `short:"d" long:"debug" description:"Show debug information"`
+	Mutator []string `short:"m" long:"mutator" description:"The mutators to apply" default:"conditional-boundary"`
 }
 
 func main() {
@@ -52,9 +58,19 @@ func main() {
 	pkgs = dedup(pkgs)
 	log.WithFields(log.Fields{"pkgs": pkgs}).Debug("User given packages")
 
+	var mutators []mutants.Mutator
+	for _, m := range opts.Mutator {
+		mt, ok := mutatorMapping[m]
+		if !ok {
+			log.WithField("mutator", m).Warning("Unrecognized mutator")
+			continue
+		}
+		mutators = append(mutators, mt)
+	}
+
 	g := gomutate.New(wd)
 	for _, pkg := range pkgs {
-		g.Run(pkg, &mutants.ConditionalsBoundary{}, &mutants.NegateConditionals{})
+		g.Run(pkg, mutators)
 	}
 
 	g.GatherResults()
