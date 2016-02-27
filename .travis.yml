@@ -15,12 +15,20 @@ install:
   - go build ./cmd/gomutate
 
 script:
+  # define our own packages so that go does not
+  # try and build our vendored deps
+  - |
+    pkgs=()
+    while read -r line; do
+      pkgs+=("$line")
+    done <<< "$(go list ./... | grep -v 'vendor')"
+
   # ensure everything is formatted all pretty like
-  - gofmt -l -s .
+  - if gofmt -l -s . | grep -v 'vendor/'; then exit 1; fi
   # vet out possible issues
-  - go vet ./...
+  - go vet ${pkgs[@]}
   # run tests
-  - go test ./... -v -race
+  - go test ${pkgs[@]} -v -race
 
 after_success:
   - |
@@ -41,9 +49,9 @@ after_success:
 
 after_script:
   # check possible styling errors
-  - golint ./...
+  - for pkg in ${pkgs[@]}; do; golint $pkg; done
   # check for potentially complex functions but don't fail build
-  - gocyclo -over 15 . || true
+  - gocyclo -over 15 . | grep -v 'vendor/' || true
   # refresh godocs in case there were api changes
   - |
     if [[ "$TRAVIS_PULL_REQUEST" == "false" ]] && [[ "$TRAVIS_BRANCH" == "master" ]]; then
