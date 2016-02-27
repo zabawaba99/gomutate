@@ -6,5 +6,5 @@ trap "rm $tmp" EXIT
 go build -o $tmp ./cmd/gomutate
 
 cd sample
-../$tmp
+../$tmp $@
 cd -

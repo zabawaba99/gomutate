@@ -1,12 +1,13 @@
 package gomutate
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
+
+	log "github.com/Sirupsen/logrus"
 )
 
 var (
@@ -17,19 +18,9 @@ var (
 func init() {
 	w, err := os.Getwd()
 	if err != nil {
-		fLog("Could not get working directory %s\n", err)
+		log.Fatalf("Could not get working directory %s", err)
 	}
 	wd = w
-}
-
-func dLog(msg string, args ...interface{}) {
-	msg = fmt.Sprintf("DEBUG\t%s\n", msg)
-	fmt.Printf(msg, args...)
-}
-
-func fLog(msg string, args ...interface{}) {
-	fmt.Printf(msg, args...)
-	os.Exit(1)
 }
 
 func randomStr(size int) string {

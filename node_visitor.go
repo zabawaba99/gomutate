@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strconv"
 
+	log "github.com/Sirupsen/logrus"
 	"github.com/zabawaba99/gomutate/mutants"
 )
 
@@ -33,9 +34,9 @@ func (v *nodeVistor) Visit(n ast.Node) ast.Visitor {
 	filename := trimWD(v.file.Name())
 	basedir := filepath.Join(mutationDir, v.mutation.Name(), filename+"."+count)
 	if err := v.ast.write(basedir); err != nil {
-		fLog("Could not create mutation file %s\n", err)
+		log.Fatalf("Could not create mutation file %s", err)
 	}
-	dLog("Created mutation for %s", basedir)
+	log.Debugf("Created mutation for %s", basedir)
 
 	mutation.Reset()
 	v.ast.mtx.Unlock()

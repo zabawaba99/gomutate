@@ -10,6 +10,7 @@ import (
 	"strings"
 	"sync"
 
+	log "github.com/Sirupsen/logrus"
 	"github.com/zabawaba99/gomutate/mutants"
 )
 
@@ -37,7 +38,7 @@ func newAST(filename string) (*AST, error) {
 		return true
 	})
 
-	dLog("Parsed - %s - %#v", filename, a.pkgs)
+	log.Debugf("Parsed - %s - %#v", filename, a.pkgs)
 
 	return a, nil
 }
@@ -56,6 +57,7 @@ func (a *AST) forEachFile(fn func(string, *ast.File) error) error {
 
 func (a *AST) ApplyMutation(m mutants.Mutator) {
 	a.forEachFile(func(name string, file *ast.File) error {
+		log.Debugf("file - %s", name)
 		if strings.HasSuffix(name, "_test.go") {
 			return nil
 		}
