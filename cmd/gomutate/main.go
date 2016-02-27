@@ -18,7 +18,7 @@ var mutatorMapping = map[string]mutants.Mutator{
 
 type Options struct {
 	Debug   bool     `short:"d" long:"debug" description:"Show debug information"`
-	Mutator []string `short:"m" long:"mutator" description:"The mutators to apply" default:"conditional-boundary"`
+	Mutator []string `short:"m" long:"mutator" description:"The mutators to apply" default:"conditionals-boundary"`
 }
 
 func main() {

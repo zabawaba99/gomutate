@@ -16,7 +16,7 @@ import (
 )
 
 type AST struct {
-	mtx   sync.Mutex
+	mtxs  map[string]sync.RWMutex
 	fset  *token.FileSet
 	pkgs  map[string]*ast.Package
 	files map[string]*token.File
@@ -30,6 +30,7 @@ func newAST(filename string) (*AST, error) {
 	}
 
 	a := &AST{
+		mtxs:  map[string]sync.RWMutex{},
 		fset:  fset,
 		pkgs:  pkgs,
 		files: map[string]*token.File{},
@@ -44,11 +45,13 @@ func newAST(filename string) (*AST, error) {
 	return a, nil
 }
 
-func (a *AST) forEachFile(fn func(string, *ast.File) error) error {
+type walkFunc func(name string, file *ast.File) error
+
+func (a *AST) forEachFile(fn walkFunc) error {
 	for _, pkg := range a.pkgs {
-		for fname, ast := range pkg.Files {
+		for fname, file := range pkg.Files {
 			fname = trimWD(fname)
-			if err := fn(fname, ast); err != nil {
+			if err := fn(fname, file); err != nil {
 				return err
 			}
 		}
@@ -57,20 +60,30 @@ func (a *AST) forEachFile(fn func(string, *ast.File) error) error {
 }
 
 func (a *AST) ApplyMutation(m mutants.Mutator) {
+	var wg sync.WaitGroup
 	a.forEachFile(func(name string, file *ast.File) error {
 		log.WithField("file", name).Debug("Visting file...")
 		if strings.HasSuffix(name, "_test.go") {
 			return nil
 		}
 
-		visitor := newNodeVisitor(a, a.files[name], m)
-		ast.Walk(visitor, file)
+		wg.Add(1)
+		go func() {
+			visitor := newNodeVisitor(a, a.files[name], m)
+			ast.Walk(visitor, file)
+			wg.Done()
+		}()
 		return nil
 	})
+	wg.Wait()
 }
 
 func (a *AST) write(basepath string) error {
 	return a.forEachFile(func(name string, ast *ast.File) error {
+		mtx := a.mtxs[name]
+		mtx.RLock()
+		defer mtx.RUnlock()
+
 		filename := filepath.Join(basepath, name)
 		if err := os.MkdirAll(filepath.Dir(filename), 0777); err != nil {
 			return err
