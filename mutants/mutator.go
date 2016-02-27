@@ -1,10 +1,6 @@
 package mutants
 
-import (
-	"fmt"
-	"go/ast"
-	"os"
-)
+import "go/ast"
 
 type Mutation struct {
 	OrgStmt string
@@ -15,9 +11,4 @@ type Mutation struct {
 type Mutator interface {
 	Mutate(ast.Node) (Mutation, bool)
 	Name() string
-}
-
-func fLog(msg string, args ...interface{}) {
-	fmt.Printf(msg, args...)
-	os.Exit(1)
 }

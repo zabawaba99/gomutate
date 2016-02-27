@@ -1,6 +1,7 @@
 package gomutate
 
 import (
+	"fmt"
 	"go/ast"
 	"go/parser"
 	"go/printer"
@@ -38,7 +39,7 @@ func newAST(filename string) (*AST, error) {
 		return true
 	})
 
-	log.Debugf("Parsed - %s - %#v", filename, a.pkgs)
+	log.WithField("pkgs", fmt.Sprintf("%v", a.pkgs)).Debug("Parsed packages")
 
 	return a, nil
 }
@@ -57,7 +58,7 @@ func (a *AST) forEachFile(fn func(string, *ast.File) error) error {
 
 func (a *AST) ApplyMutation(m mutants.Mutator) {
 	a.forEachFile(func(name string, file *ast.File) error {
-		log.Debugf("file - %s", name)
+		log.WithField("file", name).Debug("Visting file...")
 		if strings.HasSuffix(name, "_test.go") {
 			return nil
 		}

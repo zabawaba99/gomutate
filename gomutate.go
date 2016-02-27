@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	log "github.com/Sirupsen/logrus"
@@ -40,49 +41,50 @@ func (g *Gomutate) Run(pkg string, mutations ...mutants.Mutator) {
 	}
 
 	for _, m := range mutations {
-		log.Infof("Generating %s mutations", m.Name())
+		log.WithField("mutation", m.Name()).Info("Generating mutation...")
 		// generate mutations
 		a.ApplyMutation(m)
 
-		log.Infof("Testing mutations")
+		log.WithField("mutation", m.Name()).Info("Testing mutations...")
 		// run tests
 		g.runTests(pkg, m)
 	}
-
-	// generate reports
-	g.aggregateResults()
 }
 
 func (g *Gomutate) runTests(pkg string, m mutants.Mutator) {
 	mtpath := filepath.Join(mutationDir, m.Name(), pkg)
 	deviants, err := ioutil.ReadDir(mtpath)
 	if err != nil {
-		log.Debugf("Could not find mutant directories %s", err)
+		log.WithField("pkg", mtpath).Warning("Could not find mutant directories")
 		return
 	}
 
+	reg := regexp.MustCompile(`^.+\.go\.\d+$`)
 	for _, mt := range deviants {
 		if !mt.IsDir() {
 			continue
 		}
 
-		pkg := filepath.Join(mtpath, mt.Name())
-		log.Debugf("Running tests for %s", pkg)
+		if !reg.MatchString(mt.Name()) {
+			// a subpackage
+			continue
+		}
 
-		cmd := exec.Command("go", "test", "."+separator+pkg+separator+"...")
-		// cmd.Stdout = os.Stdout
-		// cmd.Stderr = os.Stderr
+		mutant := filepath.Join(mtpath, mt.Name())
+		log.Debugf("Running tests for %s", mutant)
+
+		cmd := exec.Command("go", "test", "."+separator+mutant+separator+"...")
 		cmd.Run()
 
 		var md mutants.Data
-		md.Load(pkg)
+		md.Load(mutant)
 		md.Killed = !cmd.ProcessState.Success()
-		log.Debugf("Killed %t", md.Killed)
-		md.Save(pkg)
+		log.WithFields(log.Fields{"killed": md.Killed, "mutant": mutant}).Info("Result")
+		md.Save(mutant)
 	}
 }
 
-func (g *Gomutate) aggregateResults() {
+func (g *Gomutate) GatherResults() {
 	results := []mutants.Data{}
 	filepath.Walk(mutationDir, func(path string, info os.FileInfo, err error) error {
 		if info.Name() != mutants.DataFileName {
@@ -100,7 +102,7 @@ func (g *Gomutate) aggregateResults() {
 
 	f, err := os.Create(filepath.Join(mutationDir, "results.json"))
 	if err != nil {
-		log.Fatalf("Could not create gomutate.json %s", err)
+		log.WithError(err).Fatal("Could not create gomutate.json")
 	}
 	defer f.Close()
 

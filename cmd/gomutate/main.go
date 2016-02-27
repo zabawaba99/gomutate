@@ -56,6 +56,8 @@ func main() {
 	for _, pkg := range pkgs {
 		g.Run(pkg, &mutants.ConditionalsBoundary{}, &mutants.NegateConditionals{})
 	}
+
+	g.GatherResults()
 }
 
 func findAllPackages(wd string) (pkgs []string) {

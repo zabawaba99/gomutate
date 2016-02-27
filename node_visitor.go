@@ -44,6 +44,7 @@ func (v *nodeVistor) Visit(n ast.Node) ast.Visitor {
 	md := mutants.Data{
 		Original:   mutation.OrgStmt,
 		Mutation:   mutation.NewStmt,
+		Type:       v.mutation.Name(),
 		Filename:   v.file.Name(),
 		LineNumber: v.file.Line(n.Pos()),
 	}
