@@ -10,7 +10,7 @@ used for mutation testing on the JVM.
 Install the binary.
 
 ```bash
-go get github.com/zabawaba99/gomutate
+go get github.com/zabawaba99/gomutate/cmd/gomutate
 ```
 
 Navigate to the directory of your project and run

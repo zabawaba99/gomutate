@@ -3,7 +3,7 @@
 tmp="rasdfas.out"
 trap "rm $tmp" EXIT
 
-go build -o $tmp
+go build -o $tmp ./cmd/gomutate
 
 cd sample
 ../$tmp

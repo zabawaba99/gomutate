@@ -1,4 +1,4 @@
-package main
+package gomutate
 
 import (
 	"go/ast"

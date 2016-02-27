@@ -1,4 +1,4 @@
-package main
+package gomutate
 
 import (
 	"encoding/json"
@@ -24,32 +24,36 @@ func init() {
 	}
 }
 
-func main() {
+type Gomutate struct {
+	wd string
+}
+
+func New(wd string) *Gomutate {
+	return &Gomutate{wd: wd}
+}
+
+func (g *Gomutate) Run(mutations ...mutants.Mutator) {
 	// parse files
-	a, err := newAST(wd)
+	a, err := newAST(g.wd)
 	if err != nil {
 		fLog("Could not read dir %s\n", err)
 	}
 
-	mutants := []mutants.Mutator{
-		&mutants.ConditionalsBoundary{},
-		&mutants.NegateConditionals{},
-	}
-	for _, m := range mutants {
-		fmt.Printf("Generating %s mutants\n", m.Name())
-		// generate mutants
+	for _, m := range mutations {
+		fmt.Printf("Generating %s mutations\n", m.Name())
+		// generate mutations
 		a.ApplyMutation(m)
 
-		fmt.Println("Testing mutants")
+		fmt.Println("Testing mutations")
 		// run tests
-		runTests(m)
+		g.runTests(m)
 	}
 
 	// generate reports
-	aggregateResults()
+	g.aggregateResults()
 }
 
-func runTests(m mutants.Mutator) {
+func (g *Gomutate) runTests(m mutants.Mutator) {
 	mtpath := filepath.Join(mutationDir, m.Name())
 	deviants, err := ioutil.ReadDir(mtpath)
 	if err != nil {
@@ -77,7 +81,7 @@ func runTests(m mutants.Mutator) {
 	}
 }
 
-func aggregateResults() {
+func (g *Gomutate) aggregateResults() {
 	results := []mutants.Data{}
 	filepath.Walk(mutationDir, func(path string, info os.FileInfo, err error) error {
 		if info.Name() != mutants.DataFileName {
