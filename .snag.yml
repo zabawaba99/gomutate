@@ -8,6 +8,9 @@ ignore:
   - sample/_gomutate
   - "**.out"
   - gomutate
+  # test in cmd/gomutate
+  - cmd/gomutate/sub
+  - cmd/gomutate/_sub
 
 build:
   - go build ./cmd/gomutate

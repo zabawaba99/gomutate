@@ -16,7 +16,11 @@ import (
 
 const mutationDir = "_gomutate"
 
-func init() {
+type Gomutate struct {
+	wd string
+}
+
+func New(wd string) *Gomutate {
 	if err := os.RemoveAll(mutationDir); err != nil {
 		log.Fatalf("Could not delete '_gomutate' directory %s", err)
 	}
@@ -24,13 +28,7 @@ func init() {
 	if err := os.Mkdir(mutationDir, 0777); err != nil {
 		log.Fatalf("Could not recreate '_gomutate' directory %s", err)
 	}
-}
 
-type Gomutate struct {
-	wd string
-}
-
-func New(wd string) *Gomutate {
 	return &Gomutate{wd: wd}
 }
 
