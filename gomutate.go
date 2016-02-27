@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+	"sync"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/zabawaba99/gomutate/mutants"
@@ -40,15 +41,21 @@ func (g *Gomutate) Run(pkg string, mutations []mutants.Mutator) {
 		log.Fatalf("Could not read dir %s", err)
 	}
 
+	var wg sync.WaitGroup
 	for _, m := range mutations {
-		log.WithField("mutation", m.Name()).Info("Generating mutation...")
-		// generate mutations
-		a.ApplyMutation(m)
+		wg.Add(1)
+		go func(m mutants.Mutator) {
+			log.WithField("mutation", m.Name()).Info("Generating mutation...")
+			// generate mutations
+			a.ApplyMutation(m)
 
-		log.WithField("mutation", m.Name()).Info("Testing mutations...")
-		// run tests
-		g.runTests(pkg, m)
+			log.WithField("mutation", m.Name()).Info("Testing mutations...")
+			// run tests
+			g.runTests(pkg, m)
+			wg.Done()
+		}(m)
 	}
+	wg.Wait()
 }
 
 func (g *Gomutate) runTests(pkg string, m mutants.Mutator) {
