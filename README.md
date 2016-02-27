@@ -7,17 +7,20 @@ used for mutation testing on the JVM.
 
 ## Usage
 
-Install the binary.
+Install the binary:
 
 ```bash
 go get github.com/zabawaba99/gomutate/cmd/gomutate
 ```
 
-Navigate to the directory of your project and run
+Navigate to the directory of your project and run:
 
 ```bash
-gomutate
+gomutate ./...
 ```
+
+The above command will run the default mutations on all packages in your
+project.
 
 ## Mutation Tests
 
