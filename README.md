@@ -1,4 +1,4 @@
-# Gomutate
+# Gomutate [![Build Status](https://travis-ci.org/zabawaba99/gomutate.svg?branch=master)](https://travis-ci.org/zabawaba99/gomutate) [![Coverage Status](https://coveralls.io/repos/github/zabawaba99/gomutate/badge.svg?branch=master)](https://coveralls.io/github/zabawaba99/gomutate?branch=master)
 
 A mutation testing tool for Go programs.
 

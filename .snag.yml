@@ -1,0 +1,14 @@
+---
+# Snag configuartion
+
+verbose: true
+
+ignore:
+  - .git
+  - sample/_gomutate
+  - "**.out"
+  - gomutate
+
+build:
+  - go build ./cmd/gomutate
+  - ./run
