@@ -11,6 +11,8 @@ ignore:
   # test in cmd/gomutate
   - cmd/gomutate/sub
   - cmd/gomutate/_sub
+  # test in mutants
+  - "mutants/test_**"
 
 build:
   - go build ./cmd/gomutate

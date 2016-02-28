@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
-
-	log "github.com/Sirupsen/logrus"
 )
 
 const DataFileName = "gomutate.json"
@@ -19,22 +17,22 @@ type Data struct {
 	Killed     bool   `json:"killed"`
 }
 
-func (md *Data) Load(path string) {
+func (md *Data) Load(path string) error {
 	f, err := os.Open(filepath.Join(path, DataFileName))
 	if err != nil {
-		log.WithError(err).Fatal("Could not open gomutate.json")
+		return err
 	}
 	defer f.Close()
 
-	json.NewDecoder(f).Decode(md)
+	return json.NewDecoder(f).Decode(md)
 }
 
-func (md *Data) Save(path string) {
+func (md *Data) Save(path string) error {
 	f, err := os.Create(filepath.Join(path, DataFileName))
 	if err != nil {
-		log.WithError(err).Fatal("Could not create gomutate.json")
+		return err
 	}
 	defer f.Close()
 
-	json.NewEncoder(f).Encode(md)
+	return json.NewEncoder(f).Encode(md)
 }

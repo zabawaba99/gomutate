@@ -82,9 +82,17 @@ func (g *Gomutate) runTests(pkg string, m mutants.Mutator) {
 		cmd.Run()
 
 		var md mutants.Data
-		md.Load(mutant)
+		if err := md.Load(mutant); err != nil {
+			fields := log.Fields{"error": err, "mutation": mutant}
+			log.WithFields(fields).Warning("Could not save results for mutation")
+			continue
+		}
+
 		md.Killed = !cmd.ProcessState.Success()
-		md.Save(mutant)
+		if err := md.Save(mutant); err != nil {
+			fields := log.Fields{"error": err, "mutation": mutant}
+			log.WithFields(fields).Warning("Could not save results for mutation")
+		}
 
 		fields := log.Fields{"killed": md.Killed, "mutant": mutant}
 		if md.Killed {

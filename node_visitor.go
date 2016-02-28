@@ -48,7 +48,13 @@ func (v *nodeVistor) Visit(n ast.Node) ast.Visitor {
 		Filename:   v.file.Name(),
 		LineNumber: v.file.Line(n.Pos()),
 	}
-	md.Save(basedir)
+	if err := md.Save(basedir); err != nil {
+		fields := log.Fields{
+			"error":    err,
+			"mutation": basedir,
+		}
+		log.WithFields(fields).Warning("Could not save results for mutation")
+	}
 
 	return v
 }
