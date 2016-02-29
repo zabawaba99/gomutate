@@ -22,6 +22,25 @@ gomutate ./...
 The above command will run the default mutations on all packages in your
 project.
 
+### Flags
+
+```
+Usage:
+  gomutate [OPTIONS]
+
+Application Options:
+  -d, --debug    Show debug information
+  -m, --mutator= The mutators to apply (conditionals-boundary)
+
+Help Options:
+  -h, --help     Show this help message
+```
+
+## Available mutators
+
+* [conditionals-boundary](http://pitest.org/quickstart/mutators/#CONDITIONALS_BOUNDARY)
+* [negate-conditionals](http://pitest.org/quickstart/mutators/#NEGATE_CONDITIONALS)
+
 ## Mutation Tests
 
 A chunk of the documentation below was taken from [Pitest](http://pitest.org/)
