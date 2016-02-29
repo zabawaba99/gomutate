@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"go/ast"
 	"go/token"
+
+	log "github.com/Sirupsen/logrus"
 )
 
 var negateConditionalsMapping = map[token.Token]token.Token{
@@ -27,7 +29,7 @@ type NegateConditionals struct {
 }
 
 func (nc *NegateConditionals) Name() string {
-	return "boundary_mutations"
+	return "negate_conditionals"
 }
 
 func (nc *NegateConditionals) Mutate(node ast.Node) (m Mutation, ok bool) {
@@ -36,16 +38,17 @@ func (nc *NegateConditionals) Mutate(node ast.Node) (m Mutation, ok bool) {
 		// ignore
 	case *ast.BinaryExpr:
 		bExpr := node.(*ast.BinaryExpr)
+		fields := log.Fields{"name": nc.Name(), "token": bExpr.Op}
 
 		newOP, ok := negateConditionalsMapping[bExpr.Op]
 		if !ok {
-			// fmt.Println("Skipping...", bExpr.Op)
+			log.WithFields(fields).Debug("Skipping...")
 			return m, false
 		}
 
 		oldOp := bExpr.Op
 		bExpr.Op = newOP
-		// fmt.Println("Mutated...", oldOp)
+		log.WithFields(fields).Debug("Mutated...")
 
 		m = Mutation{
 			OrgStmt: fmt.Sprintf("%s", oldOp),
@@ -55,7 +58,8 @@ func (nc *NegateConditionals) Mutate(node ast.Node) (m Mutation, ok bool) {
 		// setup return
 		return m, true
 	default:
-		// fmt.Printf("ParseFunc: %T\n", node)
+		fields := log.Fields{"name": nc.Name(), "visited": fmt.Sprintf("%T", node)}
+		log.WithFields(fields).Debug("found unknown node")
 	}
 
 	return
